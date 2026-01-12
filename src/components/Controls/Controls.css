@@ -1,0 +1,195 @@
+.controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px;
+  padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.3) 60%,
+    transparent 100%
+  );
+}
+
+/* Track info section */
+.controls-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.controls-scene {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.controls-track {
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Main control buttons */
+.controls-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.control-btn:active {
+  transform: scale(0.92);
+}
+
+.control-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Navigation buttons */
+.control-btn-nav {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.control-btn-nav:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.control-btn-nav svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Main play/pause button */
+.control-btn-main {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a2e;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn-main:hover {
+  background: white;
+  transform: scale(1.05);
+}
+
+.control-btn-main:active {
+  transform: scale(0.95);
+}
+
+.control-btn-main svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Loading spinner */
+.control-loader {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(26, 26, 46, 0.2);
+  border-top-color: #1a1a2e;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hint text */
+.controls-hint {
+  margin-top: 12px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  text-align: center;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .controls {
+    padding: 12px 16px;
+    padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px));
+  }
+
+  .controls-info {
+    margin-bottom: 12px;
+  }
+
+  .controls-scene {
+    font-size: 10px;
+  }
+
+  .controls-track {
+    font-size: 14px;
+  }
+
+  .controls-buttons {
+    gap: 10px;
+    padding: 8px 16px;
+  }
+
+  .control-btn-nav {
+    width: 40px;
+    height: 40px;
+  }
+
+  .control-btn-nav svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .control-btn-main {
+    width: 50px;
+    height: 50px;
+  }
+
+  .control-btn-main svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* Hide hint on desktop */
+@media (min-width: 768px) and (hover: hover) {
+  .controls-hint {
+    display: none;
+  }
+}
