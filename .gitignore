@@ -27,3 +27,5 @@ npm-debug.log*
 # Claude temp files
 tmpclaude-*
 .claude/
+
+.vercel

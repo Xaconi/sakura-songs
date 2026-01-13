@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import Carousel from './components/Carousel/Carousel';
 import Controls from './components/Controls/Controls';
 import SceneIndicator from './components/SceneIndicator/SceneIndicator';
-import useAmbientPlayer from './hooks/useAmbientPlayer';
+import useAudioPlayer from './hooks/useAudioPlayer';
 import { scenes } from './data/scenes';
 import './App.css';
 
@@ -10,7 +10,7 @@ function App() {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
   const currentScene = scenes[currentSceneIndex];
 
-  // Ambient audio player hook
+  // Audio player hook - usa los tracks de la escena actual
   const {
     currentTrack,
     isPlaying,
@@ -18,7 +18,7 @@ function App() {
     toggle,
     play,
     hasInteracted
-  } = useAmbientPlayer(currentScene?.id);
+  } = useAudioPlayer(currentScene?.tracks || [], currentScene?.id);
 
   // Handle scene change (from carousel or buttons)
   const handleSceneChange = useCallback((index) => {
