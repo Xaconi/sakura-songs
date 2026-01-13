@@ -1,26 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Howl } from 'howler';
 
-function useAudioPlayer(tracks) {
+function useAudioPlayer(tracks, sceneId = null) {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const howlRef = useRef(null);
   const tracksRef = useRef(tracks);
+  const isLoadingRef = useRef(false);
+  const prevSceneIdRef = useRef(sceneId);
 
-  // Update tracks ref when tracks change
   useEffect(() => {
     tracksRef.current = tracks;
   }, [tracks]);
 
-  // Load and play a specific track
   const loadTrack = useCallback((index, autoplay = false) => {
-    // Unload previous track
-    if (howlRef.current) {
-      howlRef.current.unload();
-      howlRef.current = null;
-    }
+    if (isLoadingRef.current) return;
 
     const currentTracks = tracksRef.current;
     if (!currentTracks || currentTracks.length === 0) return;
@@ -30,20 +26,29 @@ function useAudioPlayer(tracks) {
 
     if (!track?.src) return;
 
+    if (howlRef.current) {
+      howlRef.current.unload();
+      howlRef.current = null;
+    }
+
+    isLoadingRef.current = true;
     setIsLoading(true);
 
     howlRef.current = new Howl({
       src: [track.src],
       html5: true,
       volume: 0.7,
+      preload: 'metadata',
       onload: () => {
+        isLoadingRef.current = false;
         setIsLoading(false);
-        if (autoplay && hasInteracted) {
+        if (autoplay) {
           howlRef.current?.play();
-          setIsPlaying(true);
         }
       },
       onplay: () => {
+        isLoadingRef.current = false;
+        setIsLoading(false);
         setIsPlaying(true);
       },
       onpause: () => {
@@ -53,30 +58,33 @@ function useAudioPlayer(tracks) {
         setIsPlaying(false);
       },
       onend: () => {
-        // Auto-play next track in loop
         const nextIndex = (trackIndex + 1) % currentTracks.length;
         setCurrentTrackIndex(nextIndex);
         loadTrack(nextIndex, true);
       },
-      onloaderror: (id, error) => {
-        console.warn('Audio load error:', error);
+      onloaderror: () => {
+        isLoadingRef.current = false;
         setIsLoading(false);
-        // Try next track on error
-        const nextIndex = (trackIndex + 1) % currentTracks.length;
-        if (nextIndex !== trackIndex) {
-          setCurrentTrackIndex(nextIndex);
-          loadTrack(nextIndex, autoplay);
-        }
+      },
+      onplayerror: () => {
+        isLoadingRef.current = false;
+        setIsLoading(false);
       }
     });
 
-    setCurrentTrackIndex(trackIndex);
-  }, [hasInteracted]);
+    setTimeout(() => {
+      if (isLoadingRef.current) {
+        isLoadingRef.current = false;
+        setIsLoading(false);
+      }
+    }, 3000);
 
-  // Handle track changes when scene changes
+    setCurrentTrackIndex(trackIndex);
+  }, []);
+
   useEffect(() => {
-    if (tracks && tracks.length > 0) {
-      loadTrack(0, isPlaying || hasInteracted);
+    if (tracks && tracks.length > 0 && !howlRef.current) {
+      loadTrack(0, false);
     }
 
     return () => {
@@ -85,27 +93,37 @@ function useAudioPlayer(tracks) {
         howlRef.current = null;
       }
     };
-  }, [tracks]);
+  }, []);
 
-  // Play function
+  useEffect(() => {
+    if (prevSceneIdRef.current === sceneId) return;
+
+    const wasPlaying = isPlaying;
+    prevSceneIdRef.current = sceneId;
+
+    if (tracks && tracks.length > 0) {
+      isLoadingRef.current = false;
+      setCurrentTrackIndex(0);
+      loadTrack(0, wasPlaying);
+    }
+  }, [sceneId, tracks, isPlaying, loadTrack]);
+
   const play = useCallback(() => {
     setHasInteracted(true);
 
-    if (howlRef.current) {
+    if (howlRef.current && !isLoadingRef.current) {
       howlRef.current.play();
     } else if (tracksRef.current && tracksRef.current.length > 0) {
       loadTrack(currentTrackIndex, true);
     }
   }, [currentTrackIndex, loadTrack]);
 
-  // Pause function
   const pause = useCallback(() => {
     if (howlRef.current) {
       howlRef.current.pause();
     }
   }, []);
 
-  // Toggle play/pause
   const toggle = useCallback(() => {
     if (isPlaying) {
       pause();
@@ -114,7 +132,6 @@ function useAudioPlayer(tracks) {
     }
   }, [isPlaying, play, pause]);
 
-  // Next track
   const nextTrack = useCallback(() => {
     const currentTracks = tracksRef.current;
     if (!currentTracks || currentTracks.length === 0) return;
@@ -124,7 +141,6 @@ function useAudioPlayer(tracks) {
     loadTrack(nextIndex, isPlaying);
   }, [currentTrackIndex, isPlaying, loadTrack]);
 
-  // Previous track
   const prevTrack = useCallback(() => {
     const currentTracks = tracksRef.current;
     if (!currentTracks || currentTracks.length === 0) return;
@@ -136,7 +152,6 @@ function useAudioPlayer(tracks) {
     loadTrack(prevIndex, isPlaying);
   }, [currentTrackIndex, isPlaying, loadTrack]);
 
-  // Get current track info
   const currentTrack = tracks?.[currentTrackIndex] || null;
 
   return {
