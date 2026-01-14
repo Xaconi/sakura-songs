@@ -1,15 +1,15 @@
 import './SceneIndicator.css';
 
-function SceneIndicator({ total, current, onSelect }) {
+function SceneIndicator({ scenes, currentIndex, onSelect }) {
   return (
     <div className="scene-indicator">
-      {Array.from({ length: total }, (_, index) => (
+      {scenes.map((scene, index) => (
         <button
-          key={index}
-          className={`indicator-dot ${index === current ? 'active' : ''}`}
+          key={scene.id}
+          className={`indicator-dot ${index === currentIndex ? 'active' : ''}`}
           onClick={() => onSelect(index)}
-          aria-label={`Ir a escena ${index + 1}`}
-          aria-current={index === current ? 'true' : 'false'}
+          aria-label={`Ir a escena ${scene.name}`}
+          aria-current={index === currentIndex ? 'true' : 'false'}
         />
       ))}
     </div>

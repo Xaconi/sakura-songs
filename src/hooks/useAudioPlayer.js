@@ -5,6 +5,7 @@ function useAudioPlayer(tracks, sceneId = null) {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [hasInteracted, setHasInteracted] = useState(false);
   const howlRef = useRef(null);
   const tracksRef = useRef(tracks);
@@ -33,6 +34,7 @@ function useAudioPlayer(tracks, sceneId = null) {
 
     isLoadingRef.current = true;
     setIsLoading(true);
+    setError(null);
 
     howlRef.current = new Howl({
       src: [track.src],
@@ -42,6 +44,7 @@ function useAudioPlayer(tracks, sceneId = null) {
       onload: () => {
         isLoadingRef.current = false;
         setIsLoading(false);
+        setError(null);
         if (autoplay) {
           howlRef.current?.play();
         }
@@ -50,6 +53,7 @@ function useAudioPlayer(tracks, sceneId = null) {
         isLoadingRef.current = false;
         setIsLoading(false);
         setIsPlaying(true);
+        setError(null);
       },
       onpause: () => {
         setIsPlaying(false);
@@ -62,13 +66,15 @@ function useAudioPlayer(tracks, sceneId = null) {
         setCurrentTrackIndex(nextIndex);
         loadTrack(nextIndex, true);
       },
-      onloaderror: () => {
+      onloaderror: (id, errorCode) => {
         isLoadingRef.current = false;
         setIsLoading(false);
+        setError('No se pudo cargar el audio. Verifica tu conexión.');
       },
-      onplayerror: () => {
+      onplayerror: (id, errorCode) => {
         isLoadingRef.current = false;
         setIsLoading(false);
+        setError('Error al reproducir. Intenta de nuevo.');
       }
     });
 
@@ -154,17 +160,23 @@ function useAudioPlayer(tracks, sceneId = null) {
 
   const currentTrack = tracks?.[currentTrackIndex] || null;
 
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
   return {
     currentTrack,
     currentTrackIndex,
     isPlaying,
     isLoading,
+    error,
     play,
     pause,
     toggle,
     nextTrack,
     prevTrack,
-    hasInteracted
+    hasInteracted,
+    clearError,
   };
 }
 

@@ -8,7 +8,7 @@
   -webkit-user-select: none;
 }
 
-/* Header/Logo */
+/* Header/Logo - Mobile first (base styles) */
 .app-header {
   position: fixed;
   top: 0;
@@ -18,8 +18,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 20px;
-  padding-top: max(24px, calc(env(safe-area-inset-top) + 16px));
+  padding: 16px;
+  padding-top: max(16px, calc(env(safe-area-inset-top) + 8px));
   text-align: center;
   background: linear-gradient(
     to bottom,
@@ -31,21 +31,68 @@
 }
 
 .app-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 300;
   color: rgba(255, 255, 255, 0.95);
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   text-transform: uppercase;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
   margin: 0;
 }
 
 .app-subtitle {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 300;
   color: rgba(255, 255, 255, 0.6);
   letter-spacing: 2px;
-  margin-top: 6px;
+  margin-top: 4px;
+}
+
+/* Audio error message */
+.audio-error {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(220, 53, 69, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 8px;
+  color: white;
+  font-size: 13px;
+  max-width: calc(100% - 32px);
+  animation: slideDown 0.3s ease-out;
+}
+
+.audio-error button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.8;
+}
+
+.audio-error button:hover {
+  opacity: 1;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 /* Prevent text selection during swipe */
@@ -69,25 +116,29 @@
   animation: fadeIn 1s ease-out;
 }
 
-/* Mobile adjustments */
-@media (max-width: 480px) {
+/* Tablet breakpoint */
+@media (min-width: 481px) {
   .app-header {
-    padding: 16px;
-    padding-top: max(16px, calc(env(safe-area-inset-top) + 8px));
+    padding: 24px 20px;
+    padding-top: max(24px, calc(env(safe-area-inset-top) + 16px));
   }
 
   .app-title {
-    font-size: 20px;
-    letter-spacing: 3px;
+    font-size: 24px;
+    letter-spacing: 4px;
   }
 
   .app-subtitle {
-    font-size: 11px;
-    margin-top: 4px;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  .audio-error {
+    font-size: 14px;
   }
 }
 
-/* Desktop adjustments */
+/* Desktop breakpoint */
 @media (min-width: 768px) {
   .app-header {
     padding: 32px 20px;

@@ -15,9 +15,9 @@ function App() {
     currentTrack,
     isPlaying,
     isLoading,
+    error,
     toggle,
-    play,
-    hasInteracted
+    clearError,
   } = useAudioPlayer(currentScene?.tracks || [], currentScene?.id);
 
   // Handle scene change (from carousel or buttons)
@@ -39,11 +39,6 @@ function App() {
     );
   }, []);
 
-  // Handle play button or first interaction
-  const handlePlay = useCallback(() => {
-    play();
-  }, [play]);
-
   return (
     <div className="app">
       {/* Carousel with swipe */}
@@ -59,10 +54,18 @@ function App() {
         <p className="app-subtitle">Encuentra tu paz interior</p>
       </header>
 
+      {/* Audio error message */}
+      {error && (
+        <div className="audio-error" role="alert">
+          <span>{error}</span>
+          <button onClick={clearError} aria-label="Cerrar mensaje">×</button>
+        </div>
+      )}
+
       {/* Scene indicator dots */}
       <SceneIndicator
-        total={scenes.length}
-        current={currentSceneIndex}
+        scenes={scenes}
+        currentIndex={currentSceneIndex}
         onSelect={handleSceneChange}
       />
 
@@ -71,12 +74,10 @@ function App() {
         isPlaying={isPlaying}
         isLoading={isLoading}
         onToggle={toggle}
-        onPlay={handlePlay}
         onPrevScene={prevScene}
         onNextScene={nextScene}
         currentTrack={currentTrack}
         sceneName={currentScene?.name}
-        hasInteracted={hasInteracted}
       />
     </div>
   );
