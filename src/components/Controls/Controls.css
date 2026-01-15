@@ -193,3 +193,38 @@
     display: none;
   }
 }
+
+/* Sleep Timer Button */
+.control-btn-timer {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  margin-left: 4px;
+}
+
+.control-btn-timer:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.control-btn-timer.active {
+  background: rgba(147, 112, 219, 0.4);
+  box-shadow: 0 0 12px rgba(147, 112, 219, 0.3);
+}
+
+.control-btn-timer svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 480px) {
+  .control-btn-timer {
+    width: 36px;
+    height: 36px;
+  }
+
+  .control-btn-timer svg {
+    width: 18px;
+    height: 18px;
+  }
+}

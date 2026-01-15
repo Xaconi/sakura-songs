@@ -2,12 +2,16 @@ import { useState, useCallback } from 'react';
 import Carousel from './components/Carousel/Carousel';
 import Controls from './components/Controls/Controls';
 import SceneIndicator from './components/SceneIndicator/SceneIndicator';
+import SleepTimerModal from './components/SleepTimer/SleepTimerModal';
 import useAudioPlayer from './hooks/useAudioPlayer';
+import useSleepTimer from './hooks/useSleepTimer';
 import { scenes } from './data/scenes';
 import './App.css';
 
 function App() {
   const [currentSceneIndex, setCurrentSceneIndex] = useState(0);
+  const [isTimerModalOpen, setIsTimerModalOpen] = useState(false);
+  const [showTimerEndMessage, setShowTimerEndMessage] = useState(false);
   const currentScene = scenes[currentSceneIndex];
 
   // Audio player hook - usa los tracks de la escena actual
@@ -18,7 +22,40 @@ function App() {
     error,
     toggle,
     clearError,
+    fadeOut,
   } = useAudioPlayer(currentScene?.tracks || [], currentScene?.id);
+
+  // Sleep timer callback
+  const handleTimerEnd = useCallback(() => {
+    fadeOut(5000, () => {
+      setShowTimerEndMessage(true);
+      setTimeout(() => setShowTimerEndMessage(false), 3000);
+    });
+  }, [fadeOut]);
+
+  // Sleep timer hook
+  const {
+    isActive: sleepTimerActive,
+    isFading: sleepTimerIsFading,
+    formattedTime: sleepTimerTime,
+    PRESETS,
+    startTimer,
+    cancelTimer,
+    validateCustomTime,
+  } = useSleepTimer(handleTimerEnd);
+
+  // Timer modal handlers
+  const handleOpenTimerModal = useCallback(() => {
+    setIsTimerModalOpen(true);
+  }, []);
+
+  const handleCloseTimerModal = useCallback(() => {
+    setIsTimerModalOpen(false);
+  }, []);
+
+  const handleStartTimer = useCallback((minutes) => {
+    startTimer(minutes);
+  }, [startTimer]);
 
   // Handle scene change (from carousel or buttons)
   const handleSceneChange = useCallback((index) => {
@@ -78,7 +115,28 @@ function App() {
         onNextScene={nextScene}
         currentTrack={currentTrack}
         sceneName={currentScene?.name}
+        onSleepTimerClick={handleOpenTimerModal}
+        sleepTimerActive={sleepTimerActive}
+        sleepTimerTime={sleepTimerTime}
+        sleepTimerIsFading={sleepTimerIsFading}
+        onSleepTimerCancel={cancelTimer}
       />
+
+      {/* Sleep Timer Modal */}
+      <SleepTimerModal
+        isOpen={isTimerModalOpen}
+        onClose={handleCloseTimerModal}
+        onStartTimer={handleStartTimer}
+        presets={PRESETS}
+        validateCustomTime={validateCustomTime}
+      />
+
+      {/* Timer End Message */}
+      {showTimerEndMessage && (
+        <div className="timer-end-message" role="status" aria-live="polite">
+          <span>Dulces sueños</span>
+        </div>
+      )}
     </div>
   );
 }
