@@ -11,6 +11,7 @@ function useAudioPlayer(tracks, sceneId = null) {
   const tracksRef = useRef(tracks);
   const isLoadingRef = useRef(false);
   const prevSceneIdRef = useRef(sceneId);
+  const fadeIntervalRef = useRef(null);
 
   useEffect(() => {
     tracksRef.current = tracks;
@@ -98,6 +99,10 @@ function useAudioPlayer(tracks, sceneId = null) {
         howlRef.current.unload();
         howlRef.current = null;
       }
+      if (fadeIntervalRef.current) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+      }
     };
   }, []);
 
@@ -164,6 +169,51 @@ function useAudioPlayer(tracks, sceneId = null) {
     setError(null);
   }, []);
 
+  const stop = useCallback(() => {
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+      fadeIntervalRef.current = null;
+    }
+    if (howlRef.current) {
+      howlRef.current.stop();
+      howlRef.current.volume(0.7);
+    }
+    setIsPlaying(false);
+  }, []);
+
+  const fadeOut = useCallback((durationMs = 5000, onComplete) => {
+    if (!howlRef.current) {
+      onComplete?.();
+      return;
+    }
+
+    if (fadeIntervalRef.current) {
+      clearInterval(fadeIntervalRef.current);
+    }
+
+    const currentVolume = howlRef.current.volume();
+    const steps = 50;
+    const stepDuration = durationMs / steps;
+    const volumeDecrement = currentVolume / steps;
+    let currentStep = 0;
+
+    fadeIntervalRef.current = setInterval(() => {
+      currentStep++;
+      const newVolume = Math.max(0, currentVolume - (volumeDecrement * currentStep));
+
+      if (howlRef.current) {
+        howlRef.current.volume(newVolume);
+      }
+
+      if (currentStep >= steps) {
+        clearInterval(fadeIntervalRef.current);
+        fadeIntervalRef.current = null;
+        stop();
+        onComplete?.();
+      }
+    }, stepDuration);
+  }, [stop]);
+
   return {
     currentTrack,
     currentTrackIndex,
@@ -177,6 +227,8 @@ function useAudioPlayer(tracks, sceneId = null) {
     prevTrack,
     hasInteracted,
     clearError,
+    stop,
+    fadeOut,
   };
 }
 
