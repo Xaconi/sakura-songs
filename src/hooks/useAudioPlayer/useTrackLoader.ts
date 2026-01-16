@@ -42,7 +42,7 @@ export function useTrackLoader(options: TrackLoaderOptions) {
       src: [track.src],
       html5: true,
       volume: 0.7,
-      preload: 'metadata',
+      preload: true,
       onload: () => {
         isLoadingRef.current = false;
         setIsLoading(false);

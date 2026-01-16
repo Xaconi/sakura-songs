@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import type { Howl } from 'howler';
 import type { HowlRefs } from './types';
 
@@ -7,7 +7,7 @@ export function useHowlInstance(): HowlRefs {
   const isLoadingRef = useRef<boolean>(false);
   const fadeIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  return { howlRef, isLoadingRef, fadeIntervalRef };
+  return useMemo(() => ({ howlRef, isLoadingRef, fadeIntervalRef }), []);
 }
 
 export function cleanupHowl(refs: HowlRefs): void {
