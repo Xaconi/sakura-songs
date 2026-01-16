@@ -41,7 +41,7 @@ function useAudioPlayer(tracks, sceneId = null) {
       src: [track.src],
       html5: true,
       volume: 0.7,
-      preload: 'metadata',
+      preload: true,
       onload: () => {
         isLoadingRef.current = false;
         setIsLoading(false);
@@ -104,7 +104,7 @@ function useAudioPlayer(tracks, sceneId = null) {
         fadeIntervalRef.current = null;
       }
     };
-  }, []);
+  }, [tracks, loadTrack]);
 
   useEffect(() => {
     if (prevSceneIdRef.current === sceneId) return;
