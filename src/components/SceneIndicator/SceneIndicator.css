@@ -1,23 +1,24 @@
+/* Mobile-first base styles */
 .scene-indicator {
   position: fixed;
   top: 50%;
-  right: 20px;
-  transform: translateY(-50%);
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 10;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px 8px;
-  background: rgba(255, 255, 255, 0.08);
+  flex-direction: row;
+  gap: 20px;
+  padding: 10px 20px;
+  background: rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.indicator-dot {
-  width: 10px;
-  height: 10px;
+.scene-indicator__dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.3);
@@ -27,33 +28,32 @@
   padding: 0;
 }
 
-.indicator-dot:hover {
+.scene-indicator__dot:hover {
   background: rgba(255, 255, 255, 0.5);
   transform: scale(1.2);
 }
 
-.indicator-dot.active {
+.scene-indicator__dot--active {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
   transform: scale(1.1);
 }
 
-/* Mobile: horizontal at center of screen */
-@media (max-width: 480px) {
+/* Tablet+ : vertical on right side */
+@media (min-width: 481px) {
   .scene-indicator {
     top: 50%;
-    bottom: auto;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, -50%);
-    flex-direction: row;
-    gap: 20px;
-    padding: 10px 20px;
-    background: rgba(0, 0, 0, 0.2);
+    left: auto;
+    right: 20px;
+    transform: translateY(-50%);
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 8px;
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .indicator-dot {
-    width: 8px;
-    height: 8px;
+  .scene-indicator__dot {
+    width: 10px;
+    height: 10px;
   }
 }

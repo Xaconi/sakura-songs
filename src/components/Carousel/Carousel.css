@@ -13,7 +13,7 @@
   cursor: grabbing;
 }
 
-.carousel-slide {
+.carousel__slide {
   position: absolute;
   top: 0;
   left: 0;
@@ -22,7 +22,7 @@
   will-change: transform;
 }
 
-.carousel-gradient {
+.carousel__gradient {
   position: absolute;
   top: 0;
   left: 0;
@@ -30,7 +30,7 @@
   height: 100%;
 }
 
-.carousel-image {
+.carousel__image {
   position: absolute;
   top: 0;
   left: 0;
@@ -41,7 +41,7 @@
   background-repeat: no-repeat;
 }
 
-.carousel-overlay {
+.carousel__overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -57,8 +57,7 @@
   pointer-events: none;
 }
 
-/* Drag indicator */
-.carousel-drag-indicator {
+.carousel__drag-indicator {
   position: fixed;
   top: 50%;
   left: 0;
@@ -71,7 +70,7 @@
   z-index: 5;
 }
 
-.drag-hint {
+.carousel__drag-hint {
   padding: 12px 20px;
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
@@ -81,18 +80,18 @@
   font-size: 14px;
   font-weight: 400;
   letter-spacing: 1px;
-  animation: fadeIn 0.2s ease;
+  animation: carouselFadeIn 0.2s ease;
 }
 
-.drag-hint-left {
+.carousel__drag-hint--left {
   margin-right: auto;
 }
 
-.drag-hint-right {
+.carousel__drag-hint--right {
   margin-left: auto;
 }
 
-@keyframes fadeIn {
+@keyframes carouselFadeIn {
   from {
     opacity: 0;
     transform: scale(0.9);
