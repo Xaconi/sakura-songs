@@ -4,7 +4,7 @@ import type { Track } from '../../data/types';
 import type { TrackLoaderOptions } from './types';
 
 export function useTrackLoader(options: TrackLoaderOptions) {
-  const { howlRefs, setIsLoading, setIsPlaying, setError, setCurrentTrackIndex } = options;
+  const { howlRefs, currentTrackIndexRef, setIsLoading, setIsPlaying, setError, setCurrentTrackIndex } = options;
   const tracksRef = useRef<Track[]>([]);
 
   const loadTrack = useCallback((
@@ -33,7 +33,7 @@ export function useTrackLoader(options: TrackLoaderOptions) {
     setError(null);
 
     const onTrackEnd = () => {
-      const nextIndex = (trackIndex + 1) % tracksRef.current.length;
+      const nextIndex = (currentTrackIndexRef.current + 1) % tracksRef.current.length;
       setCurrentTrackIndex(nextIndex);
       loadTrack(tracksRef.current, nextIndex, true);
     };
