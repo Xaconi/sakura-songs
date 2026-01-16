@@ -164,7 +164,7 @@ npm run test:coverage # Ejecuta tests con reporte de cobertura
 ## Estado del Proyecto
 
 - **Versión**: 1.0.0
-- **Branch principal**: main
+- **Branch principal**: master
 - **Branch de desarrollo**: claude/add-claude-md-uSiYx
 - **Último commit**: Initial commit: Sakura Songs relaxing music player
 
@@ -202,19 +202,72 @@ npm run test:coverage # Ejecuta tests con reporte de cobertura
 4. **Browser Policy**: Requiere interacción del usuario para iniciar audio (política del navegador)
 5. **Idioma**: La aplicación está en español
 
-## Convenciones de Código
+## Contextos Activos
 
-- Componentes en PascalCase
-- Hooks personalizados con prefijo `use`
-- CSS modules separados por componente
-- Funciones de callback con useCallback para optimización
-- Estado local con useState, sin gestión global (Redux/Zustand)
+Claude Code SIEMPRE debe leer estos archivos antes de cualquier tarea:
 
-## Mejoras Futuras Potenciales
+- `.claude/contexts/project-context.md` - Descripción del proyecto
+- `.claude/contexts/coding-standards.md` - Estándares de código
+- `.claude/contexts/architecture-guidelines.md` - Arquitectura del proyecto
+- `.claude/contexts/testing-strategy.md` - Estrategia de testing
+- `.claude/features/[FEATURE].md` - Requisitos de la feature actual (cuando aplique)
 
-- Sistema de playlist personalizado
-- Más escenas y variedad de audio
-- Soporte para audio generativo/procedural
-- Modo offline/PWA
-- Preferencias de usuario (volumen, favoritos)
-- Visualizador de audio
+## Límites de Tokens
+
+- **Lectura inicial:** Máximo 15K tokens
+- **Planificación:** Máximo 5K tokens
+- **Implementación por fase:** Máximo 15K tokens
+- **Implementación total:** Máximo 60K tokens
+- **Documentación:** Máximo 10K tokens
+
+## Scope Restrictions
+
+### Lectura Inicial
+**SOLO leer:**
+- Archivos `.md` en `.claude/`
+- NO leer código del proyecto todavía
+
+**Excluir siempre:**
+- `node_modules/`
+- `dist/`
+- `build/`
+- `coverage/`
+
+### Análisis de Código
+- SOLO durante fase de integración
+- SOLO archivos específicos necesarios
+
+## Workflows
+
+### Feature Implementation
+1. Leer `.claude/prompts/prompt-create-feature.md`
+2. Leer `.claude/features/[NOMBRE].md`
+3. Seguir el workflow paso a paso
+4. Checkpoints en cada fase
+
+### Refactor
+1. Leer `.claude/prompts/prompt-refactor-code.md`
+2. Seguir el workflow paso a paso
+3. Checkpoints en cada fase
+
+### Testing
+- Framework: Vitest
+- Coverage mínimo: 70%
+- Seguir `.claude/prompts/prompt-generate-tests.md`
+- Generar tests automáticamente después de implementar
+
+## Git Workflow
+
+1. `git checkout master`
+2. `git pull origin master`
+3. `git checkout -b feature/[NOMBRE]`
+4. Commits con conventional commits
+5. NO auto-push (requiere confirmación)
+
+## Comportamiento
+
+- ✅ Preguntar antes de cambios mayores
+- ✅ Mostrar plan antes de implementar
+- ✅ Checkpoint después de cada fase
+- ✅ Aplicar coding standards automáticamente
+- ❌ NO ser verboso (modo conciso)

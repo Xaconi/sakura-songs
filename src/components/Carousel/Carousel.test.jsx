@@ -44,14 +44,14 @@ describe('Carousel', () => {
     it('should_render_all_scenes', () => {
       render(<Carousel {...defaultProps} />);
 
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides).toHaveLength(3);
     });
 
     it('should_render_scene_with_correct_gradient', () => {
       render(<Carousel {...defaultProps} />);
 
-      const gradients = document.querySelectorAll('.carousel-gradient');
+      const gradients = document.querySelectorAll('.carousel__gradient');
       expect(gradients[0]).toHaveStyle({
         background: mockScenes[0].gradient,
       });
@@ -60,7 +60,7 @@ describe('Carousel', () => {
     it('should_render_scene_with_correct_image', () => {
       render(<Carousel {...defaultProps} />);
 
-      const images = document.querySelectorAll('.carousel-image');
+      const images = document.querySelectorAll('.carousel__image');
       expect(images[0]).toHaveStyle({
         backgroundImage: `url(${mockScenes[0].image})`,
       });
@@ -71,19 +71,19 @@ describe('Carousel', () => {
 
       // Si usa key correcta, no debería haber warnings de React
       // La existencia de slides con estilos correctos indica keys correctas
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides).toHaveLength(mockScenes.length);
     });
 
     it('should_apply_transform_based_on_currentIndex', () => {
       const { rerender } = render(<Carousel {...defaultProps} currentIndex={0} />);
 
-      let slides = document.querySelectorAll('.carousel-slide');
+      let slides = document.querySelectorAll('.carousel__slide');
       // Primer slide debería tener translateX(0)
       expect(slides[0].style.transform).toContain('translateX(0px)');
 
       rerender(<Carousel {...defaultProps} currentIndex={1} />);
-      slides = document.querySelectorAll('.carousel-slide');
+      slides = document.querySelectorAll('.carousel__slide');
       // Primer slide debería moverse a la izquierda
       expect(slides[0].style.transform).toContain('translateX(-1000px)');
     });
@@ -97,7 +97,7 @@ describe('Carousel', () => {
       fireEvent.mouseDown(carousel, { clientX: 500 });
 
       // Mientras arrastra, no debería haber transición
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       // Al iniciar drag, isDragging se vuelve true, lo que quita transiciones
     });
 
@@ -109,7 +109,7 @@ describe('Carousel', () => {
       fireEvent.mouseMove(carousel, { clientX: 400 }); // Drag 100px izquierda
 
       // El offset debería reflejarse en el transform
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides[0].style.transform).toContain('translateX(-100px)');
     });
 
@@ -257,7 +257,7 @@ describe('Carousel', () => {
     it('should_hide_indicator_when_not_dragging', () => {
       render(<Carousel {...defaultProps} />);
 
-      expect(document.querySelector('.carousel-drag-indicator')).not.toBeInTheDocument();
+      expect(document.querySelector('.carousel__drag-indicator')).not.toBeInTheDocument();
     });
   });
 
@@ -269,14 +269,14 @@ describe('Carousel', () => {
       fireEvent.mouseDown(carousel, { clientX: 500 });
       fireEvent.mouseMove(carousel, { clientX: 400 });
 
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides[0].style.transition).toBe('none');
     });
 
     it('should_enable_transition_when_not_dragging', () => {
       render(<Carousel {...defaultProps} />);
 
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides[0].style.transition).toContain('transform');
     });
 
@@ -288,7 +288,7 @@ describe('Carousel', () => {
       fireEvent.mouseMove(carousel, { clientX: 450 });
       fireEvent.mouseUp(carousel);
 
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides[0].style.transition).toContain('transform');
     });
   });
@@ -297,14 +297,14 @@ describe('Carousel', () => {
     it('should_handle_empty_scenes_array', () => {
       render(<Carousel {...defaultProps} scenes={[]} />);
 
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides).toHaveLength(0);
     });
 
     it('should_handle_single_scene', () => {
       render(<Carousel {...defaultProps} scenes={[mockScenes[0]]} />);
 
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       expect(slides).toHaveLength(1);
     });
 
@@ -320,7 +320,7 @@ describe('Carousel', () => {
       rerender(<Carousel {...defaultProps} currentIndex={1} />);
 
       // El offset debería resetearse
-      const slides = document.querySelectorAll('.carousel-slide');
+      const slides = document.querySelectorAll('.carousel__slide');
       // Slide 0 debería estar en -1000 (currentIndex=1), no -1100
       expect(slides[0].style.transform).toBe('translateX(-1000px)');
     });

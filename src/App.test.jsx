@@ -43,15 +43,15 @@ describe('App', () => {
     const nextButton = screen.getByRole('button', { name: /siguiente/i });
 
     // Initially first indicator is active
-    expect(indicators[0]).toHaveClass('active');
-    expect(indicators[1]).not.toHaveClass('active');
+    expect(indicators[0]).toHaveClass('scene-indicator__dot--active');
+    expect(indicators[1]).not.toHaveClass('scene-indicator__dot--active');
 
     // Click next
     await user.click(nextButton);
 
     // Now second indicator should be active
-    expect(indicators[0]).not.toHaveClass('active');
-    expect(indicators[1]).toHaveClass('active');
+    expect(indicators[0]).not.toHaveClass('scene-indicator__dot--active');
+    expect(indicators[1]).toHaveClass('scene-indicator__dot--active');
   });
 
   it('should navigate to specific scene when clicking indicator', async () => {
@@ -64,7 +64,7 @@ describe('App', () => {
     await user.click(indicators[2]);
 
     // Third indicator should be active
-    expect(indicators[2]).toHaveClass('active');
-    expect(indicators[0]).not.toHaveClass('active');
+    expect(indicators[2]).toHaveClass('scene-indicator__dot--active');
+    expect(indicators[0]).not.toHaveClass('scene-indicator__dot--active');
   });
 });

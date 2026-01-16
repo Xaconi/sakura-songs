@@ -190,7 +190,7 @@ describe('SleepTimerModal', () => {
       const user = userEvent.setup();
       render(<SleepTimerModal {...defaultProps} />);
 
-      const overlay = document.querySelector('.sleep-timer-overlay');
+      const overlay = document.querySelector('.sleep-timer-modal__overlay');
       await user.click(overlay);
 
       expect(defaultProps.onClose).toHaveBeenCalled();
