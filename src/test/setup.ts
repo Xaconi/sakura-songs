@@ -65,3 +65,6 @@ class MockAudioContext {
 
 global.AudioContext = MockAudioContext as unknown as typeof AudioContext;
 (global as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext = MockAudioContext as unknown as typeof AudioContext;
+
+// Mock scrollTo para CSS Scroll Snap carousel
+Element.prototype.scrollTo = vi.fn();
