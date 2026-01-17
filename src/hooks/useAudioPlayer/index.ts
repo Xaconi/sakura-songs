@@ -17,6 +17,7 @@ export default function useAudioPlayer(
   const [hasInteracted, setHasInteracted] = useState(false);
 
   const prevSceneIdRef = useRef(sceneId);
+  const currentTrackIndexRef = useRef(0);
   const howlRefs = useHowlInstance();
 
   const stop = useCallback(() => {
@@ -32,7 +33,7 @@ export default function useAudioPlayer(
   }, [howlRefs]);
 
   const { loadTrack, tracksRef } = useTrackLoader({
-    howlRefs, setIsLoading, setIsPlaying, setError, setCurrentTrackIndex,
+    howlRefs, currentTrackIndexRef, setIsLoading, setIsPlaying, setError, setCurrentTrackIndex,
   });
 
   const fadeOut = useFadeOut({ howlRefs, stop });
@@ -41,6 +42,10 @@ export default function useAudioPlayer(
     howlRefs, tracksRef, currentTrackIndex, isPlaying,
     loadTrack, setCurrentTrackIndex, setHasInteracted,
   });
+
+  useEffect(() => {
+    currentTrackIndexRef.current = currentTrackIndex;
+  }, [currentTrackIndex]);
 
   useEffect(() => {
     if (tracks?.length && !howlRefs.howlRef.current) loadTrack(tracks, 0, false);
