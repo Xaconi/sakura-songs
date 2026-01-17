@@ -1,6 +1,5 @@
-import { useCallback } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import type { Scene } from '../../data/types';
-import useDrag from './hooks/useDrag';
 import './Carousel.css';
 
 interface CarouselProps {
@@ -14,40 +13,52 @@ export default function Carousel({
   currentIndex,
   onChangeScene,
 }: CarouselProps) {
-  const handleSwipeLeft = useCallback(() => {
-    if (currentIndex < scenes.length - 1) {
-      onChangeScene(currentIndex + 1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isScrollingRef = useRef(false);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    isScrollingRef.current = true;
+    const slideWidth = container.offsetWidth;
+    container.scrollTo({ left: index * slideWidth, behavior: 'smooth' });
+
+    setTimeout(() => {
+      isScrollingRef.current = false;
+    }, 400);
+  }, []);
+
+  useEffect(() => {
+    scrollToIndex(currentIndex);
+  }, [currentIndex, scrollToIndex]);
+
+  const handleScroll = useCallback(() => {
+    if (isScrollingRef.current) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const slideWidth = container.offsetWidth;
+    const newIndex = Math.round(container.scrollLeft / slideWidth);
+
+    if (newIndex !== currentIndex && newIndex >= 0 && newIndex < scenes.length) {
+      onChangeScene(newIndex);
     }
   }, [currentIndex, scenes.length, onChangeScene]);
 
-  const handleSwipeRight = useCallback(() => {
-    if (currentIndex > 0) {
-      onChangeScene(currentIndex - 1);
-    }
-  }, [currentIndex, onChangeScene]);
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-  const { containerRef, isDragging, dragOffset, handlers } = useDrag({
-    onSwipeLeft: handleSwipeLeft,
-    onSwipeRight: handleSwipeRight,
-    threshold: 0.2,
-    resetDeps: [currentIndex],
-  });
-
-  const getSlideStyle = useCallback((index: number) => {
-    const containerWidth = containerRef.current?.offsetWidth || window.innerWidth;
-    const baseOffset = (index - currentIndex) * containerWidth;
-    const totalOffset = baseOffset + dragOffset;
-
-    return {
-      transform: `translateX(${totalOffset}px)`,
-      transition: isDragging ? 'none' : 'transform 0.4s ease-out',
-    };
-  }, [containerRef, currentIndex, dragOffset, isDragging]);
+    container.addEventListener('scrollend', handleScroll);
+    return () => container.removeEventListener('scrollend', handleScroll);
+  }, [handleScroll]);
 
   return (
-    <div ref={containerRef} className="carousel" {...handlers}>
-      {scenes.map((scene, index) => (
-        <div key={scene.id} className="carousel__slide" style={getSlideStyle(index)}>
+    <div ref={containerRef} className="carousel">
+      {scenes.map((scene) => (
+        <div key={scene.id} className="carousel__slide">
           <div className="carousel__gradient" style={{ background: scene.gradient }} />
           <div
             className="carousel__image"
@@ -56,21 +67,6 @@ export default function Carousel({
           <div className="carousel__overlay" />
         </div>
       ))}
-
-      {isDragging && (
-        <div className="carousel__drag-indicator">
-          {dragOffset > 50 && currentIndex > 0 && (
-            <span className="carousel__drag-hint carousel__drag-hint--left">
-              ← {scenes[currentIndex - 1]?.name}
-            </span>
-          )}
-          {dragOffset < -50 && currentIndex < scenes.length - 1 && (
-            <span className="carousel__drag-hint carousel__drag-hint--right">
-              {scenes[currentIndex + 1]?.name} →
-            </span>
-          )}
-        </div>
-      )}
     </div>
   );
 }
