@@ -7,6 +7,13 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 ## [Unreleased]
 
 ### Added
+- **Tooltips en controles**: Texto descriptivo al hacer hover en los botones del reproductor
+  - Play/Pause: "Reproducir" / "Pausar" (dinámico según estado)
+  - Navegación: "Escena anterior" / "Siguiente escena"
+  - Temporizador: "Temporizador"
+  - Solo visible en desktop (dispositivos con hover)
+  - Tests unitarios (11 tests nuevos)
+
 - **Sleep Timer**: Temporizador para detener la música automáticamente
   - Presets de tiempo: 15, 30, 45, 60, 90 minutos
   - Input para tiempo personalizado (1-480 minutos)

@@ -220,3 +220,59 @@
     transform: rotate(360deg);
   }
 }
+
+/* Tooltip styles - desktop only */
+@media (min-width: 768px) and (hover: hover) {
+  .controls__btn[data-tooltip] {
+    position: relative;
+  }
+
+  .controls__btn[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    border-radius: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .controls__btn[data-tooltip]::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 2px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.85);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .controls__btn[data-tooltip]:hover::after,
+  .controls__btn[data-tooltip]:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0.5s;
+  }
+
+  .controls__btn[data-tooltip]:active::after,
+  .controls__btn[data-tooltip]:active::before {
+    opacity: 0;
+    visibility: hidden;
+    transition-delay: 0s;
+  }
+}
