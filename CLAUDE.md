@@ -212,6 +212,246 @@ Claude Code SIEMPRE debe leer estos archivos antes de cualquier tarea:
 - `.claude/contexts/testing-strategy.md` - Estrategia de testing
 - `.claude/features/[FEATURE].md` - Requisitos de la feature actual (cuando aplique)
 
+## 🤖 WORKFLOW AUTOMÁTICO INTELIGENTE
+
+### Principio Fundamental
+
+**Por defecto, TODO cambio de código sigue un workflow multi-fase con sub-agentes especializados**, a menos que:
+1. El usuario explícitamente indique lo contrario
+2. Claude detecte que el cambio es TRIVIAL (ver criterios abajo)
+
+### Detección Automática de Cambios Triviales
+
+Claude debe **evaluar primero** si el cambio solicitado es trivial. Si lo es, **SALTAR el workflow completo** y avisar en consola.
+
+#### ✅ Cambios TRIVIALES (skip workflow):
+
+**Correcciones menores de texto:**
+- Typos en comentarios, strings, documentación
+- Corrección de gramática o ortografía
+- Cambios de puntuación o formato de texto
+
+**Eliminaciones sin impacto:**
+- Borrar archivos no utilizados (imports, assets, código muerto)
+- Eliminar console.logs o debuggers
+- Remover comentarios obsoletos o TODO completados
+
+**Cambios de configuración triviales:**
+- Actualizar README con info sin código
+- Modificar .gitignore
+- Cambiar título de HTML o meta tags
+- Actualizar versión en package.json (sin cambios de código)
+
+**Refactors cosméticos:**
+- Renombrar variables para claridad (sin cambiar lógica)
+- Reordenar imports alfabéticamente
+- Formatear código (prettier, indentación)
+- Añadir/quitar líneas en blanco
+
+**Cambios de estilo puro:**
+- Ajustar colores, espaciados, tamaños de fuente
+- Cambiar CSS que no afecta funcionalidad
+- Modificar transiciones o animaciones sutiles
+
+#### ⚠️ Cambios NO TRIVIALES (ejecutar workflow):
+
+- Cualquier cambio en lógica de negocio
+- Nuevas funcionalidades o features
+- Modificaciones en APIs o interfaces
+- Cambios que afecten comportamiento
+- Refactorings arquitectónicos
+- Correcciones de bugs lógicos
+- Cambios que requieran testing
+- Modificaciones en hooks o state management
+
+### Output para Cambios Triviales
+
+Cuando Claude detecte un cambio trivial, debe:
+
+```
+⚡ CAMBIO TRIVIAL DETECTADO - WORKFLOW SALTADO
+
+Tipo: [Typo fix / File deletion / Config update / etc]
+Razón: [Breve explicación de por qué es trivial]
+
+Cambios realizados:
+- [Lista de cambios]
+
+✅ Completado sin ejecutar workflow multi-fase
+```
+
+### Workflow Multi-Fase (Cambios NO Triviales)
+
+Para cambios que **NO son triviales**, ejecutar TODAS estas fases en secuencia:
+
+#### FASE 1: IMPLEMENTACIÓN
+**Determinar el especialista necesario:**
+
+- **Frontend changes** → Leer `/mnt/skills/user/frontend-specialist.md`
+  - Cambios en componentes React
+  - Modificaciones de UI/UX
+  - Estilos o diseño
+  
+- **Backend changes** → Leer `/mnt/skills/user/backend-specialist.md`
+  - APIs, servicios, lógica de negocio
+  - Data layer, integración con Cloudinary
+  - Hooks de estado o side effects
+  
+- **Mixed changes** → Leer ambos skills
+
+**Ejecutar implementación siguiendo:**
+1. El expertise del especialista
+2. Coding standards de los contextos activos
+3. Architecture guidelines del proyecto
+
+**Output esperado:**
+```
+🔧 IMPLEMENTACIÓN [Frontend/Backend Specialist]
+
+Análisis:
+- [Qué se necesita implementar]
+- [Decisiones de diseño tomadas]
+
+Archivos modificados:
+- [Lista de archivos]
+
+Cambios realizados:
+- [Descripción de cambios]
+```
+
+#### FASE 2: CODE REVIEW
+**Obligatorio después de implementación:**
+
+- Leer `/mnt/skills/user/code-reviewer.md`
+- Aplicar checklist completo de revisión
+- Si se encuentran issues → CORREGIRLOS antes de continuar
+- Documentar decisiones tomadas
+
+**Output esperado:**
+```
+✅ CODE REVIEW [Code Reviewer]
+
+Revisión completada:
+✓ [Aspecto revisado - OK]
+✓ [Aspecto revisado - OK]
+⚠️ [Issue encontrado - CORREGIDO]
+✓ [Verificación final - OK]
+
+Decisiones documentadas:
+- [Decisión 1]
+- [Decisión 2]
+```
+
+#### FASE 3: TESTING
+**Obligatorio después de code review:**
+
+- Leer `/mnt/skills/user/testing-specialist.md`
+- Generar/actualizar tests según testing strategy
+- Asegurar coverage del código nuevo/modificado
+- Simular ejecución de tests
+
+**Output esperado:**
+```
+🧪 TESTING [Testing Specialist]
+
+Tests generados/actualizados:
+- [Archivo de test 1]
+- [Archivo de test 2]
+
+Coverage:
+- [Componente/función]: X%
+- [Total estimado]: Y%
+
+Tests incluidos:
+- [Test case 1]
+- [Test case 2]
+```
+
+#### FASE 4: QA VALIDATION
+**Obligatorio después de testing:**
+
+- Leer `/mnt/skills/user/qa-specialist.md`
+- Validar requisitos funcionales
+- Verificar edge cases
+- Revisar UX/accesibilidad
+
+**Output esperado:**
+```
+🎯 QA VALIDATION [QA Specialist]
+
+Validaciones:
+✓ [Requisito funcional 1]
+✓ [Edge case verificado]
+✓ [Accesibilidad verificada]
+✓ [UX validada]
+
+Edge cases considerados:
+- [Caso 1]
+- [Caso 2]
+```
+
+#### FASE 5: DOCUMENTATION
+**Paso final:**
+
+- Leer `/mnt/skills/user/documentation-specialist.md`
+- Actualizar documentación relevante
+- Actualizar JSDoc/comentarios si necesario
+- Registrar en CHANGELOG si es cambio significativo
+
+**Output esperado:**
+```
+📚 DOCUMENTATION [Documentation Specialist]
+
+Documentación actualizada:
+- [Archivo 1]: [Qué se actualizó]
+- [Archivo 2]: [Qué se actualizó]
+
+CHANGELOG:
+- [Entrada añadida / No requiere entrada]
+```
+
+### Resumen Final del Workflow
+
+Al completar TODAS las fases, Claude debe mostrar:
+
+```
+─────────────────────────────────
+✨ WORKFLOW MULTI-FASE COMPLETADO
+
+Fases ejecutadas:
+✅ Implementación [Frontend Specialist]
+✅ Code Review [Code Reviewer]
+✅ Testing [Testing Specialist]
+✅ QA Validation [QA Specialist]
+✅ Documentation [Documentation Specialist]
+
+Estado: LISTO PARA COMMIT
+Archivos modificados: [número]
+Tests añadidos/actualizados: [número]
+Coverage estimado: [porcentaje]
+─────────────────────────────────
+```
+
+### Comandos de Override del Usuario
+
+El usuario puede saltarse el workflow con:
+
+- `"Skip workflow"` → Solo implementación, sin fases
+- `"Skip testing"` → Saltar fase 3
+- `"Skip review"` → Saltar fase 2 (NO RECOMENDADO)
+- `"Quick fix"` → Solo fases 1-2
+- `"Just implement"` → Solo fase 1
+
+Cualquier otro comando personalizado será respetado.
+
+### Notas de Ejecución
+
+- ⚠️ Si alguna fase FALLA, DETENER y reportar
+- ✅ Cada fase debe completarse antes de pasar a la siguiente
+- 📊 Mantener transparencia total en cada paso
+- 🎯 La detección de trivialidad es responsabilidad de Claude
+- 💬 En caso de duda sobre trivialidad, preguntar al usuario
+
 ## Límites de Tokens
 
 - **Lectura inicial:** Máximo 15K tokens
