@@ -1,6 +1,9 @@
+import { useState, useCallback } from 'react';
 import type { Track } from '../../data/types';
 import SleepTimerBadge from './components/SleepTimerBadge';
 import { NavButton, PlayButton, TimerButton } from './components/ControlButtons';
+import { ShareButton, type ShareMethod } from './components/ShareButton';
+import { Toast } from '../Toast';
 import './Controls.css';
 
 interface ControlsProps {
@@ -11,6 +14,7 @@ interface ControlsProps {
   onNextScene: () => void;
   currentTrack: Track | null;
   sceneName: string;
+  sceneId: string;
   onSleepTimerClick: () => void;
   sleepTimerActive: boolean;
   sleepTimerTime: string;
@@ -20,9 +24,30 @@ interface ControlsProps {
 
 export default function Controls({
   isPlaying, isLoading, onToggle, onPrevScene, onNextScene,
-  currentTrack, sceneName, onSleepTimerClick,
+  currentTrack, sceneName, sceneId, onSleepTimerClick,
   sleepTimerActive, sleepTimerTime, sleepTimerIsFading, onSleepTimerCancel,
 }: ControlsProps) {
+  const [toast, setToast] = useState<{
+    show: boolean;
+    message: string;
+    type: 'success' | 'error';
+  }>({ show: false, message: '', type: 'success' });
+
+  const handleShareSuccess = useCallback((method: ShareMethod) => {
+    const message = method === 'clipboard'
+      ? 'Link copiado al portapapeles'
+      : 'Escena compartida';
+    setToast({ show: true, message, type: 'success' });
+  }, []);
+
+  const handleShareError = useCallback(() => {
+    setToast({ show: true, message: 'No se pudo compartir', type: 'error' });
+  }, []);
+
+  const handleToastClose = useCallback(() => {
+    setToast((prev) => ({ ...prev, show: false }));
+  }, []);
+
   return (
     <div className="controls">
       <div className="controls__info">
@@ -39,6 +64,12 @@ export default function Controls({
         <PlayButton isPlaying={isPlaying} isLoading={isLoading} onClick={onToggle} />
         <NavButton direction="next" onClick={onNextScene} />
         <TimerButton isActive={sleepTimerActive} onClick={onSleepTimerClick} />
+        <ShareButton
+          sceneId={sceneId}
+          sceneName={sceneName}
+          onShareSuccess={handleShareSuccess}
+          onShareError={handleShareError}
+        />
       </div>
 
       {sleepTimerActive && (
@@ -46,6 +77,14 @@ export default function Controls({
           formattedTime={sleepTimerTime}
           isFading={sleepTimerIsFading}
           onCancel={onSleepTimerCancel}
+        />
+      )}
+
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={handleToastClose}
         />
       )}
 

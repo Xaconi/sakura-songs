@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import Carousel from './components/Carousel/Carousel';
 import Controls from './components/Controls/Controls';
 import SceneIndicator from './components/SceneIndicator/SceneIndicator';
@@ -8,11 +8,20 @@ import useSleepTimer from './hooks/useSleepTimer';
 import useTimerModal from './hooks/useTimerModal';
 import useSceneNavigation from './hooks/useSceneNavigation';
 import { scenes } from './data/scenes';
+import { getSceneIdFromUrl, isValidSceneId } from './utils/shareUtils';
 import './App.css';
 
+function getInitialSceneIndex(): number {
+  const sceneId = getSceneIdFromUrl();
+  if (!isValidSceneId(sceneId)) return 0;
+  const index = scenes.findIndex((s) => s.id === sceneId);
+  return index >= 0 ? index : 0;
+}
+
 export default function App() {
+  const initialIndex = useMemo(() => getInitialSceneIndex(), []);
   const { currentIndex, currentScene, goToScene, nextScene, prevScene } =
-    useSceneNavigation(scenes);
+    useSceneNavigation(scenes, initialIndex);
 
   const { currentTrack, isPlaying, isLoading, error, toggle, clearError, fadeOut } =
     useAudioPlayer(currentScene?.tracks || [], currentScene?.id);
@@ -59,6 +68,7 @@ export default function App() {
         onNextScene={nextScene}
         currentTrack={currentTrack}
         sceneName={currentScene?.name ?? ''}
+        sceneId={currentScene?.id ?? 'day'}
         onSleepTimerClick={open}
         sleepTimerActive={sleepTimerActive}
         sleepTimerTime={sleepTimerTime}
