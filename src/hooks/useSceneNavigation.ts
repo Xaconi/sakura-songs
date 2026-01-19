@@ -10,9 +10,10 @@ interface UseSceneNavigationReturn {
 }
 
 export default function useSceneNavigation(
-  scenes: Scene[]
+  scenes: Scene[],
+  initialIndex = 0
 ): UseSceneNavigationReturn {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const goToScene = useCallback((index: number) => {
     if (index >= 0 && index < scenes.length) {
