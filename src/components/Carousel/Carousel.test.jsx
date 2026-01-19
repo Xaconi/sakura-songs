@@ -218,4 +218,153 @@ describe('Carousel', () => {
       expect(slides).toHaveLength(1);
     });
   });
+
+  describe('Accessibility', () => {
+    it('should have role region on carousel container', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const carousel = document.querySelector('.carousel');
+      expect(carousel).toHaveAttribute('role', 'region');
+    });
+
+    it('should have aria-label on carousel container', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const carousel = document.querySelector('.carousel');
+      expect(carousel).toHaveAttribute('aria-label', 'Carrusel de escenas');
+    });
+
+    it('should have aria-live polite for dynamic updates', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const carousel = document.querySelector('.carousel');
+      expect(carousel).toHaveAttribute('aria-live', 'polite');
+    });
+
+    it('should be focusable with tabIndex', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const carousel = document.querySelector('.carousel');
+      expect(carousel).toHaveAttribute('tabIndex', '0');
+    });
+
+    it('should have role group on each slide', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const slides = document.querySelectorAll('.carousel__slide');
+      slides.forEach((slide) => {
+        expect(slide).toHaveAttribute('role', 'group');
+      });
+    });
+
+    it('should have aria-roledescription on each slide', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const slides = document.querySelectorAll('.carousel__slide');
+      slides.forEach((slide) => {
+        expect(slide).toHaveAttribute('aria-roledescription', 'diapositiva');
+      });
+    });
+
+    it('should have aria-label with scene name on each slide', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const slides = document.querySelectorAll('.carousel__slide');
+      expect(slides[0]).toHaveAttribute('aria-label', 'Escena Amanecer');
+      expect(slides[1]).toHaveAttribute('aria-label', 'Escena Atardecer');
+      expect(slides[2]).toHaveAttribute('aria-label', 'Escena Noche');
+    });
+
+    it('should mark non-current slides as aria-hidden', () => {
+      render(<Carousel {...defaultProps} currentIndex={1} />);
+
+      const slides = document.querySelectorAll('.carousel__slide');
+      expect(slides[0]).toHaveAttribute('aria-hidden', 'true');
+      expect(slides[1]).toHaveAttribute('aria-hidden', 'false');
+      expect(slides[2]).toHaveAttribute('aria-hidden', 'true');
+    });
+  });
+
+  describe('Keyboard Navigation', () => {
+    it('should navigate to previous scene on ArrowLeft key', () => {
+      render(<Carousel {...defaultProps} currentIndex={1} />);
+
+      const carousel = document.querySelector('.carousel');
+      fireEvent.keyDown(carousel, { key: 'ArrowLeft' });
+
+      expect(defaultProps.onChangeScene).toHaveBeenCalledWith(0);
+    });
+
+    it('should navigate to next scene on ArrowRight key', () => {
+      render(<Carousel {...defaultProps} currentIndex={1} />);
+
+      const carousel = document.querySelector('.carousel');
+      fireEvent.keyDown(carousel, { key: 'ArrowRight' });
+
+      expect(defaultProps.onChangeScene).toHaveBeenCalledWith(2);
+    });
+
+    it('should not navigate before first scene on ArrowLeft', () => {
+      render(<Carousel {...defaultProps} currentIndex={0} />);
+
+      const carousel = document.querySelector('.carousel');
+      fireEvent.keyDown(carousel, { key: 'ArrowLeft' });
+
+      expect(defaultProps.onChangeScene).not.toHaveBeenCalled();
+    });
+
+    it('should not navigate after last scene on ArrowRight', () => {
+      render(<Carousel {...defaultProps} currentIndex={2} />);
+
+      const carousel = document.querySelector('.carousel');
+      fireEvent.keyDown(carousel, { key: 'ArrowRight' });
+
+      expect(defaultProps.onChangeScene).not.toHaveBeenCalled();
+    });
+
+    it('should ignore other keys', () => {
+      render(<Carousel {...defaultProps} currentIndex={1} />);
+
+      const carousel = document.querySelector('.carousel');
+      fireEvent.keyDown(carousel, { key: 'Enter' });
+      fireEvent.keyDown(carousel, { key: 'Space' });
+      fireEvent.keyDown(carousel, { key: 'Tab' });
+
+      expect(defaultProps.onChangeScene).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Image Loading States', () => {
+    it('should show loading spinner initially', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const loadingElements = document.querySelectorAll('.carousel__loading');
+      expect(loadingElements.length).toBeGreaterThan(0);
+    });
+
+    it('should have loading class on image before load', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const images = document.querySelectorAll('.carousel__image');
+      images.forEach((img) => {
+        expect(img).toHaveClass('carousel__image--loading');
+      });
+    });
+
+    it('should show spinner with aria-label', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const loadingElements = document.querySelectorAll('.carousel__loading');
+      loadingElements.forEach((el) => {
+        expect(el).toHaveAttribute('aria-label', 'Cargando imagen');
+      });
+    });
+
+    it('should have spinner inside loading element', () => {
+      render(<Carousel {...defaultProps} />);
+
+      const spinners = document.querySelectorAll('.carousel__spinner');
+      expect(spinners.length).toBeGreaterThan(0);
+    });
+  });
 });
