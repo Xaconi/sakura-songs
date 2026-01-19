@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import type { Scene } from '../../data/types';
 import './Carousel.css';
 
@@ -8,6 +8,8 @@ interface CarouselProps {
   onChangeScene: (index: number) => void;
 }
 
+const PROGRAMMATIC_SCROLL_TIMEOUT = 400;
+
 export default function Carousel({
   scenes,
   currentIndex,
@@ -15,6 +17,8 @@ export default function Carousel({
 }: CarouselProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isScrollingRef = useRef(false);
+  const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const scrollToIndex = useCallback((index: number) => {
     const container = containerRef.current;
@@ -26,7 +30,7 @@ export default function Carousel({
 
     setTimeout(() => {
       isScrollingRef.current = false;
-    }, 400);
+    }, PROGRAMMATIC_SCROLL_TIMEOUT);
   }, []);
 
   useEffect(() => {
@@ -55,18 +59,80 @@ export default function Carousel({
     return () => container.removeEventListener('scrollend', handleScroll);
   }, [handleScroll]);
 
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (event.key === 'ArrowLeft' && currentIndex > 0) {
+        onChangeScene(currentIndex - 1);
+      } else if (event.key === 'ArrowRight' && currentIndex < scenes.length - 1) {
+        onChangeScene(currentIndex + 1);
+      }
+    },
+    [currentIndex, scenes.length, onChangeScene]
+  );
+
+  const handleImageLoad = useCallback((imageUrl: string) => {
+    setLoadedImages((prev) => new Set(prev).add(imageUrl));
+  }, []);
+
+  const handleImageError = useCallback((imageUrl: string) => {
+    setFailedImages((prev) => new Set(prev).add(imageUrl));
+  }, []);
+
+  useEffect(() => {
+    scenes.forEach((scene) => {
+      if (!loadedImages.has(scene.image) && !failedImages.has(scene.image)) {
+        const img = new Image();
+        img.onload = () => handleImageLoad(scene.image);
+        img.onerror = () => handleImageError(scene.image);
+        img.src = scene.image;
+      }
+    });
+  }, [scenes, loadedImages, failedImages, handleImageLoad, handleImageError]);
+
   return (
-    <div ref={containerRef} className="carousel">
-      {scenes.map((scene) => (
-        <div key={scene.id} className="carousel__slide">
-          <div className="carousel__gradient" style={{ background: scene.gradient }} />
+    <div
+      ref={containerRef}
+      className="carousel"
+      role="region"
+      aria-label="Carrusel de escenas"
+      aria-live="polite"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
+      {scenes.map((scene, index) => {
+        const isLoading = !loadedImages.has(scene.image) && !failedImages.has(scene.image);
+        const hasFailed = failedImages.has(scene.image);
+
+        return (
           <div
-            className="carousel__image"
-            style={{ backgroundImage: `url(${scene.image})` }}
-          />
-          <div className="carousel__overlay" />
-        </div>
-      ))}
+            key={scene.id}
+            className="carousel__slide"
+            role="group"
+            aria-roledescription="diapositiva"
+            aria-label={`Escena ${scene.name}`}
+            aria-hidden={index !== currentIndex}
+          >
+            <div className="carousel__gradient" style={{ background: scene.gradient }} />
+            {isLoading && (
+              <div className="carousel__loading" aria-label="Cargando imagen">
+                <div className="carousel__spinner" />
+              </div>
+            )}
+            {hasFailed && (
+              <div className="carousel__error" aria-label="Error al cargar imagen">
+                <span className="carousel__error-icon">⚠</span>
+              </div>
+            )}
+            {!hasFailed && (
+              <div
+                className={`carousel__image ${isLoading ? 'carousel__image--loading' : ''}`}
+                style={{ backgroundImage: `url(${scene.image})` }}
+              />
+            )}
+            <div className="carousel__overlay" />
+          </div>
+        );
+      })}
     </div>
   );
 }

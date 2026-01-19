@@ -61,3 +61,65 @@
   pointer-events: none;
 }
 
+.carousel__image--loading {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.carousel__image:not(.carousel__image--loading) {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.carousel__loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.carousel__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: carousel-spin 0.8s linear infinite;
+}
+
+@keyframes carousel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.carousel__error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.carousel__error-icon {
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.carousel:focus {
+  outline: none;
+}
+
+.carousel:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: -2px;
+}
+
