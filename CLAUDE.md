@@ -16,27 +16,77 @@
 └── testing-strategy.md     ← Estrategia de testing
 ```
 
-### PASO 2: Identificar y Leer el Prompt según la tarea
+### PASO 2: Identificar Tipo de Tarea y Tamaño
+
+| Tamaño | Características | Flujo a seguir |
+|--------|----------------|----------------|
+| **Pequeña** | < 2 archivos, < 2h, clara | Paso 3: Prompt directo |
+| **Mediana** | 2-5 archivos, 2-8h, necesita especificación | Paso 2A: Product Agent → Paso 3 |
+| **Grande** | 5+ archivos, 8+ horas, compleja | Paso 2A: Product Agent → Paso 2B: Architect Agent → Paso 3 |
+
+### PASO 2A: Para Features Medianas/Grandes - Product Agent (PRIMERO)
+
+**OBLIGATORIO antes de implementar features medianas o grandes:**
+
+```bash
+# Invocar Product Agent para crear PRD
+> Usa el product-agent para crear un PRD para [FEATURE]
+```
+
+El Product Agent:
+- ✅ Hará preguntas exhaustivas (5-15 preguntas mínimo)
+- ✅ Explorará edge cases, limitaciones, prioridades
+- ✅ Generará PRD completo SOLO después de tener todas las respuestas
+- ✅ Creará automáticamente el archivo en `.claude/features/[NOMBRE]-PRD.md`
+- ✅ Reportará la ubicación del archivo al finalizar
+
+**⚠️ IMPORTANTE:** El Product Agent NUNCA genera un PRD sin antes hacer preguntas. Si lo hace, es un error.
+
+**Resultado:** Archivo PRD en `.claude/features/[NOMBRE]-PRD.md` creado automáticamente.
+
+### PASO 2B: Para Features Grandes - Architect Agent (SEGUNDO)
+
+**OBLIGATORIO para features grandes (después del PRD):**
+
+```bash
+# Invocar Architect Agent para dividir en tareas
+> Usa el architect-agent con el PRD en .claude/features/[NOMBRE]-PRD.md
+```
+
+El Architect Agent:
+- ✅ Lee el PRD
+- ✅ Analiza la arquitectura existente
+- ✅ Divide en subtareas ejecutables (2-4h cada una)
+- ✅ Establece orden y dependencias
+- ✅ Define criterios de aceptación por tarea
+- ✅ Crea automáticamente el archivo en `.claude/features/[NOMBRE]-PLAN.md`
+- ✅ Reporta la ubicación del archivo al finalizar
+
+**Resultado:** Plan de implementación en `.claude/features/[NOMBRE]-PLAN.md` creado automáticamente.
+
+### PASO 3: Identificar y Leer el Prompt según la tarea
 
 | Tipo de tarea | Prompt a leer |
 |---------------|---------------|
-| Nueva feature | `.claude/prompts/prompt-create-feature.md` + `.claude/features/[NOMBRE].md` |
+| Nueva feature | `.claude/prompts/prompt-create-feature.md` + PRD (si existe) |
 | Refactor | `.claude/prompts/prompt-refactor-code.md` |
 | Bug fix | `.claude/prompts/prompt-fix-bug.md` |
 | Tests | `.claude/prompts/prompt-generate-tests.md` |
 | Code review | `.claude/prompts/prompt-code-review.md` |
 
-### PASO 3: Durante Implementación, usar Skills en ESTE ORDEN
+### PASO 4: Durante Implementación, usar Skills en ESTE ORDEN
 
-**Skills disponibles:**
+**Skills disponibles (se activan automáticamente):**
 
-| Skill | Ruta | Cuándo usar |
-|-------|------|-------------|
+| Skill | Ruta | Cuándo se activa |
+|-------|------|------------------|
 | Frontend | `.claude/skills/frontend-specialist/SKILL.md` | Componentes React, hooks, estado, CSS, UI |
 | Backend | `.claude/skills/backend-specialist/SKILL.md` | APIs, base de datos, servidor, backend puro |
 | Code Reviewer | `.claude/skills/code-reviewer/SKILL.md` | Después de implementar código |
 | Testing | `.claude/skills/testing-specialist/SKILL.md` | Generar/actualizar tests |
 | QA | `.claude/skills/qa-specialist/SKILL.md` | Validación final |
+| Product | `.claude/skills/product-agent/SKILL.md` | Usado por Product Agent |
+| Architect | `.claude/skills/architect-agent/SKILL.md` | Usado por Architect Agent |
 
 **Workflow de Implementación (orden estricto):**
 
@@ -62,24 +112,160 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Resumen del Flujo Completo
+---
+
+## 🤖 SISTEMA DE AGENTES
+
+Los agentes complementan el workflow normal, proporcionando **consultoría experta** cuando la necesitas.
+
+### Agentes Disponibles
+
+| Agente | Ubicación | Cuándo invocar manualmente |
+|--------|-----------|----------------------------|
+| **Product Agent** | `.claude/agents/product-agent.md` | Para crear PRDs de features medianas/grandes |
+| **Architect Agent** | `.claude/agents/architect-agent.md` | Para dividir features grandes en subtareas |
+| **Frontend Agent** | `.claude/agents/frontend-agent.md` | Consultas sobre React, hooks, componentes, CSS |
+| **Backend Agent** | `.claude/agents/backend-agent.md` | Consultas sobre Node.js, APIs, arquitectura backend |
+| **Code Review Agent** | `.claude/agents/code-review-agent.md` | Revisiones ad-hoc, segunda opinión |
+| **Testing Agent** | `.claude/agents/testing-agent.md` | Estrategia de testing, debugging tests |
+| **QA Agent** | `.claude/agents/qa-agent.md` | Validación exhaustiva pre-release |
+
+### Diferencia: Skills vs Agentes
+
+**Skills** (automáticas):
+- Se activan automáticamente durante workflows
+- Aportan expertise en background
+- Parte del proceso de implementación
+
+**Agentes** (consultivos):
+- Se invocan manualmente cuando necesitas expertise
+- Tienen contexto separado
+- Para consultas, planificación, o validación profunda
+
+### Cómo Invocar Agentes
+
+**Invocación Explícita:**
+```bash
+> Usa el frontend-agent para revisar mi componente Carousel
+> Usa el product-agent para crear un PRD de sistema de playlists
+> Usa el architect-agent para dividir esta feature en tareas
+```
+
+**Invocación Automática:**
+Los agentes pueden ser invocados automáticamente por Claude Code si detecta que son relevantes para tu pregunta.
+
+**Via Comando:**
+```bash
+/agents  # Ver lista de agentes disponibles
+```
+
+### Ejemplos de Uso
+
+**Consulta Frontend:**
+```
+> Tengo dudas sobre cómo optimizar el rendering de useAudioPlayer. 
+  Usa el frontend-agent para asesorarme.
+```
+
+**Crear PRD:**
+```
+> Quiero añadir un sistema de favoritos. Usa el product-agent para 
+  crear un PRD (y asegúrate de que me haga muchas preguntas).
+```
+
+**Dividir Feature:**
+```
+> Tengo el PRD del sistema de favoritos. Usa el architect-agent 
+  para crear el plan de implementación por tareas.
+```
+
+**Validación Pre-Release:**
+```
+> Voy a hacer deploy. Usa el qa-agent para validación exhaustiva 
+  del sistema de playlists.
+```
+
+---
+
+## 📋 FLUJOS COMPLETOS POR TAMAÑO
+
+### Feature PEQUEÑA (< 2 archivos, < 2h)
+
+```
+1. Leer contextos (.claude/contexts/*.md)
+2. Leer prompt apropiado (.claude/prompts/*)
+3. Implementar usando workflow del prompt
+4. Skills se activan automáticamente:
+   - Desarrollo (frontend/backend)
+   - Code Review
+   - Testing
+   - QA
+```
+
+### Feature MEDIANA (2-5 archivos, 2-8h)
+
+```
+1. Leer contextos (.claude/contexts/*.md)
+2. PRODUCT AGENT → Generar PRD
+   > Usa el product-agent para crear PRD de [FEATURE]
+   (Responder todas sus preguntas)
+3. Leer prompt apropiado + PRD generado
+4. Implementar usando workflow del prompt con PRD como referencia
+5. Skills se activan automáticamente
+```
+
+### Feature GRANDE (5+ archivos, 8+ horas)
+
+```
+1. Leer contextos (.claude/contexts/*.md)
+2. PRODUCT AGENT → Generar PRD
+   > Usa el product-agent para crear PRD de [FEATURE]
+   (Responder todas sus preguntas)
+3. ARCHITECT AGENT → Dividir en tareas
+   > Usa el architect-agent con el PRD para crear plan
+4. Por cada subtarea del plan:
+   a. Leer prompt apropiado
+   b. Implementar subtarea
+   c. Skills se activan automáticamente
+   d. Checkpoint (validar antes de continuar)
+5. Integración final
+6. QA Agent (opcional) para validación exhaustiva
+```
+
+---
+
+## Resumen del Flujo Completo
 
 ```
 1. CONTEXTOS (siempre primero)
    └─→ Leer todos los .claude/contexts/*.md
 
-2. PROMPT (según tarea)
+2. PLANIFICACIÃ"N (según tamaño)
+   ├─→ Pequeña: Skip a paso 3
+   ├─→ Mediana: Product Agent (PRD)
+   └─→ Grande: Product Agent (PRD) → Architect Agent (plan)
+
+3. PROMPT (según tarea)
    └─→ Leer el prompt apropiado de .claude/prompts/
+   └─→ Si hay PRD/plan, usarlo como referencia
    └─→ Seguir el workflow definido en el prompt
 
-3. SKILLS (durante fase de implementación del prompt)
+4. SKILLS (durante fase de implementación del prompt)
    └─→ a) Desarrollo: frontend-specialist O backend-specialist
    └─→ b) Code Review: code-reviewer
    └─→ c) Testing: testing-specialist
    └─→ d) QA: qa-specialist
+
+5. AGENTES CONSULTIVOS (cuando necesites)
+   └─→ Invocar manualmente para consultas, revisiones profundas, etc.
 ```
 
-**IMPORTANTE:** Los prompts definen el workflow completo (git, fases, checkpoints). Los skills solo se usan durante la fase de implementación de código.
+**IMPORTANTE:** 
+- Los **prompts** definen el workflow completo (git, fases, checkpoints)
+- Los **skills** se activan automáticamente durante implementación
+- Los **agentes** se invocan manualmente para consultoría experta
+- El **Product Agent** SIEMPRE hace preguntas antes de generar PRD
+- El **Architect Agent** divide features grandes en subtareas ejecutables
 
 ---
 
@@ -102,54 +288,73 @@
 
 ```
 sakura-songs/
-├── public/              # Archivos estáticos (audio, favicon, etc.)
+├── .claude/                 # Configuración de Claude Code
+│   ├── agents/              # Agentes consultivos
+│   │   ├── product-agent.md
+│   │   ├── architect-agent.md
+│   │   ├── frontend-agent.md
+│   │   ├── backend-agent.md
+│   │   ├── code-review-agent.md
+│   │   ├── testing-agent.md
+│   │   └── qa-agent.md
+│   ├── contexts/            # Contextos del proyecto
+│   │   ├── project-context.md
+│   │   ├── coding-standards.md
+│   │   ├── architecture-guidelines.md
+│   │   └── testing-strategy.md
+│   ├── features/            # PRDs de features
+│   │   └── [NOMBRE]-PRD.md
+│   ├── prompts/             # Workflow prompts
+│   │   ├── prompt-create-feature.md
+│   │   ├── prompt-refactor-code.md
+│   │   ├── prompt-fix-bug.md
+│   │   ├── prompt-generate-tests.md
+│   │   └── prompt-code-review.md
+│   └── skills/              # Skills especializadas
+│       ├── frontend-specialist/
+│       │   └── SKILL.md
+│       ├── backend-specialist/
+│       │   └── SKILL.md
+│       ├── code-reviewer/
+│       │   └── SKILL.md
+│       ├── testing-specialist/
+│       │   └── SKILL.md
+│       ├── qa-specialist/
+│       │   └── SKILL.md
+│       ├── product-agent/
+│       │   └── SKILL.md
+│       └── architect-agent/
+│           └── SKILL.md
+├── public/              # Archivos estáticos
 ├── src/
 │   ├── components/      # Componentes React
-│   │   ├── Carousel/    # Carrusel de escenas con swipe
-│   │   │   ├── Carousel.css
-│   │   │   ├── Carousel.jsx
-│   │   │   └── Carousel.test.jsx
-│   │   ├── Controls/    # Panel de controles de reproducción
-│   │   │   ├── Controls.css
-│   │   │   └── Controls.jsx
-│   │   ├── SceneIndicator/ # Indicadores de escena (dots)
-│   │   │   ├── SceneIndicator.css
-│   │   │   └── SceneIndicator.jsx
-│   │   └── SleepTimer/  # Sistema de temporizador de sueño
-│   │       ├── SleepTimerBadge.css
-│   │       ├── SleepTimerBadge.jsx
-│   │       ├── SleepTimerBadge.test.jsx
-│   │       ├── SleepTimerModal.css
-│   │       ├── SleepTimerModal.jsx
-│   │       └── SleepTimerModal.test.jsx
+│   │   ├── Carousel/
+│   │   ├── Controls/
+│   │   ├── SceneIndicator/
+│   │   └── SleepTimer/
 │   ├── config/
-│   │   └── cloudinary.js # Configuración de Cloudinary para audio
+│   │   └── cloudinary.js
 │   ├── data/
-│   │   └── scenes.js     # Configuración de escenas (imágenes, audio)
+│   │   └── scenes.js
 │   ├── hooks/
-│   │   ├── useAudioPlayer.js     # Hook para reproducción de audio
-│   │   ├── useAudioPlayer.test.js
-│   │   ├── useDrag.js            # Hook personalizado para gestos de drag/swipe
-│   │   ├── useDrag.test.js
-│   │   ├── useSleepTimer.js      # Hook para gestión del temporizador
-│   │   └── useSleepTimer.test.js
+│   │   ├── useAudioPlayer.js
+│   │   ├── useDrag.js
+│   │   └── useSleepTimer.js
 │   ├── test/
-│   │   └── setup.ts      # Configuración de tests
+│   │   └── setup.ts
 │   ├── utils/
-│   │   └── ambientGenerator.js # Utilidades para audio generativo
-│   ├── App.jsx           # Componente principal
-│   ├── App.css           # Estilos principales
-│   ├── App.test.jsx      # Tests del componente principal
-│   ├── main.jsx          # Punto de entrada
-│   └── index.css         # Estilos globales
+│   │   └── ambientGenerator.js
+│   ├── App.jsx
+│   ├── App.css
+│   ├── main.jsx
+│   └── index.css
 ├── docs/
-│   └── features/         # Documentación de características
-├── index.html            # HTML base
-├── package.json          # Dependencias y scripts
-├── vite.config.js        # Configuración de Vite
-├── vitest.config.ts      # Configuración de tests
-└── CHANGELOG.md          # Registro de cambios
-
+│   └── features/
+├── CLAUDE.md            # Este archivo
+├── CHANGELOG.md
+├── package.json
+├── vite.config.js
+└── vitest.config.ts
 ```
 
 ## Conceptos Clave
@@ -221,18 +426,6 @@ Hook para gestión del temporizador de sueño:
 - Gestiona presets de tiempo y entrada personalizada
 - Coordina con el reproductor de audio
 
-## Archivos Importantes
-
-- **src/data/scenes.js**: Define todas las escenas y sus recursos
-- **src/App.jsx**: Lógica principal de la aplicación
-- **src/hooks/useAudioPlayer.js**: Lógica de reproducción de audio
-- **src/config/cloudinary.js**: Configuración de Cloudinary para audio
-- **vitest.config.ts**: Configuración del framework de testing
-- **src/test/setup.ts**: Configuración de tests
-- **CHANGELOG.md**: Registro de cambios del proyecto
-- **package.json**: Dependencias y scripts npm
-- **index.html**: Configuración HTML, meta tags, fuentes
-
 ## Scripts Disponibles
 
 ```bash
@@ -248,34 +441,7 @@ npm run test:coverage # Ejecuta tests con reporte de cobertura
 
 - **Versión**: 1.0.0
 - **Branch principal**: master
-- **Branch de desarrollo**: claude/add-claude-md-uSiYx
 - **Último commit**: Initial commit: Sakura Songs relaxing music player
-
-## Nuevas Características Recientes
-
-### Sleep Timer (Temporizador de Sueño)
-- **Funcionalidad**: Permite programar la detención automática de la música
-- **Presets**: 15, 30, 45, 60, 90 minutos
-- **Personalización**: Input para tiempo personalizado (1-480 minutos)
-- **UX**: Countdown visible en badge flotante, fade-out gradual de 5 segundos
-- **Responsive**: Modal bottom-sheet en móvil, flotante en desktop
-- **Testing**: 56 tests unitarios completos
-
-### Sistema de Testing
-- **Framework**: Vitest con Testing Library
-- **Cobertura**: Tests para componentes, hooks y utilidades
-- **Configuración**: Setup personalizado con jsdom para DOM testing
-- **Scripts**: test, test:watch, test:coverage
-
-### Integración Cloudinary
-- **Audio Hosting**: Migración de archivos locales a Cloudinary
-- **Beneficios**: Distribución optimizada, CDN global
-- **Tracks**: Playlist global con 7 tracks de Calmly
-
-### Hook useDrag Personalizado
-- **Reemplazo**: Sustituye react-swipeable por implementación propia
-- **Ventajas**: Sin dependencias externas, más ligero
-- **Funcionalidad**: Gestos de drag/swipe para navegación de carrusel
 
 ## Consideraciones de Desarrollo
 
@@ -285,16 +451,16 @@ npm run test:coverage # Ejecuta tests con reporte de cobertura
 4. **Browser Policy**: Requiere interacción del usuario para iniciar audio (política del navegador)
 5. **Idioma**: La aplicación está en español
 
-## Opciones de Usuario para Skills
+## Opciones de Usuario para Skills/Agentes
 
-El usuario puede modificar el comportamiento de los skills:
+El usuario puede modificar el comportamiento:
 - **"Skip sub-agentes"** → Implementar sin consultarlos
-- **"Modo detallado"** → Mostrar razonamiento completo de cada sub-agente
+- **"Modo detallado"** → Mostrar razonamiento completo
 - **"Solo implementa"** → Sin code review ni testing automático
 
-## Cambios Triviales (Skip Skills)
+## Cambios Triviales (Skip Skills y Agentes)
 
-Para cambios triviales, NO usar skills:
+Para cambios triviales, NO usar skills ni agentes:
 - Typos en strings o comentarios
 - Eliminar archivos no usados
 - Cambios de configuración sin código
