@@ -3,6 +3,7 @@ import type { Track } from '../../data/types';
 import SleepTimerBadge from './components/SleepTimerBadge';
 import { NavButton, PlayButton, TimerButton } from './components/ControlButtons';
 import { ShareButton, type ShareMethod } from './components/ShareButton';
+import { AmbientEffectsButton } from '../AmbientEffects';
 import { Toast } from '../Toast';
 import './Controls.css';
 
@@ -20,12 +21,15 @@ interface ControlsProps {
   sleepTimerTime: string;
   sleepTimerIsFading: boolean;
   onSleepTimerCancel: () => void;
+  onAmbientEffectsClick: () => void;
+  ambientEffectActive: boolean;
 }
 
 export default function Controls({
   isPlaying, isLoading, onToggle, onPrevScene, onNextScene,
   currentTrack, sceneName, sceneId, onSleepTimerClick,
   sleepTimerActive, sleepTimerTime, sleepTimerIsFading, onSleepTimerCancel,
+  onAmbientEffectsClick, ambientEffectActive,
 }: ControlsProps) {
   const [toast, setToast] = useState<{
     show: boolean;
@@ -64,6 +68,7 @@ export default function Controls({
         <PlayButton isPlaying={isPlaying} isLoading={isLoading} onClick={onToggle} />
         <NavButton direction="next" onClick={onNextScene} />
         <TimerButton isActive={sleepTimerActive} onClick={onSleepTimerClick} />
+        <AmbientEffectsButton onClick={onAmbientEffectsClick} isActive={ambientEffectActive} />
         <ShareButton
           sceneId={sceneId}
           sceneName={sceneName}

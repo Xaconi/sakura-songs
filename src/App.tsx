@@ -1,12 +1,14 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Carousel from './components/Carousel/Carousel';
 import Controls from './components/Controls/Controls';
 import SceneIndicator from './components/SceneIndicator/SceneIndicator';
 import SleepTimerModal from './components/SleepTimer/SleepTimerModal';
+import { AmbientEffectsModal } from './components/AmbientEffects';
 import useAudioPlayer from './hooks/useAudioPlayer';
 import useSleepTimer from './hooks/useSleepTimer';
 import useTimerModal from './hooks/useTimerModal';
 import useSceneNavigation from './hooks/useSceneNavigation';
+import useAmbientEffects from './hooks/useAmbientEffects';
 import { scenes } from './data/scenes';
 import { getSceneIdFromUrl, isValidSceneId } from './utils/shareUtils';
 import './App.css';
@@ -28,9 +30,15 @@ export default function App() {
 
   const { isOpen, showEndMessage, open, close, showMessage } = useTimerModal();
 
+  const [isAmbientModalOpen, setIsAmbientModalOpen] = useState(false);
+  const ambientEffects = useAmbientEffects();
+
   const handleTimerEnd = useCallback(() => {
-    fadeOut(5000, showMessage);
-  }, [fadeOut, showMessage]);
+    fadeOut(5000, () => {
+      ambientEffects.stopAll();
+      showMessage();
+    });
+  }, [fadeOut, ambientEffects, showMessage]);
 
   const {
     isActive: sleepTimerActive,
@@ -74,6 +82,8 @@ export default function App() {
         sleepTimerTime={sleepTimerTime}
         sleepTimerIsFading={sleepTimerIsFading}
         onSleepTimerCancel={cancelTimer}
+        onAmbientEffectsClick={() => setIsAmbientModalOpen(true)}
+        ambientEffectActive={ambientEffects.activeEffectId !== null}
       />
 
       <SleepTimerModal
@@ -82,6 +92,17 @@ export default function App() {
         onStartTimer={startTimer}
         presets={PRESETS}
         validateCustomTime={validateCustomTime}
+      />
+
+      <AmbientEffectsModal
+        isOpen={isAmbientModalOpen}
+        onClose={() => setIsAmbientModalOpen(false)}
+        effects={ambientEffects.effects}
+        activeEffectId={ambientEffects.activeEffectId}
+        isLoading={ambientEffects.isLoading}
+        onToggleEffect={ambientEffects.toggleEffect}
+        onVolumeChange={ambientEffects.setVolume}
+        getVolume={ambientEffects.getVolume}
       />
 
       {showEndMessage && (
