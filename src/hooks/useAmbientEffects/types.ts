@@ -12,6 +12,8 @@ export interface AmbientEffectsActions {
   setVolume: (effectId: string, volume: number) => void;
   stopAll: () => void;
   getVolume: (effectId: string) => number;
+  pause: () => void;
+  resume: () => void;
 }
 
 export interface AmbientEffectsHook extends AmbientEffectsState, AmbientEffectsActions {

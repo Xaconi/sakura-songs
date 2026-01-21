@@ -191,6 +191,19 @@ export default function useAmbientEffects(): AmbientEffectsHook {
     });
   }, [fadeOut]);
 
+  const pause = useCallback(() => {
+    if (howlRef.current && howlRef.current.playing()) {
+      howlRef.current.pause();
+    }
+  }, []);
+
+  const resume = useCallback(async () => {
+    if (howlRef.current && !howlRef.current.playing() && activeEffectId) {
+      await resumeAudioContext();
+      howlRef.current.play();
+    }
+  }, [activeEffectId]);
+
   // Pre-resume AudioContext when returning to foreground
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -219,6 +232,8 @@ export default function useAmbientEffects(): AmbientEffectsHook {
     setVolume,
     stopAll,
     getVolume,
+    pause,
+    resume,
   };
 }
 
