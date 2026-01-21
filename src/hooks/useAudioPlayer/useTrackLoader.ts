@@ -2,6 +2,7 @@ import { useCallback, useRef } from 'react';
 import { Howl } from 'howler';
 import type { Track } from '../../data/types';
 import type { TrackLoaderOptions } from './types';
+import { safePlay, resumeAudioContext } from './usePlaybackRecovery';
 
 export function useTrackLoader(options: TrackLoaderOptions) {
   const { howlRefs, currentTrackIndexRef, setIsLoading, setIsPlaying, setError, setCurrentTrackIndex } = options;
@@ -38,16 +39,21 @@ export function useTrackLoader(options: TrackLoaderOptions) {
       loadTrack(tracksRef.current, nextIndex, true);
     };
 
-    howlRef.current = new Howl({
+    const currentHowl = new Howl({
       src: [track.src],
       html5: true,
       volume: 0.7,
       preload: true,
-      onload: () => {
+      onload: async () => {
         isLoadingRef.current = false;
         setIsLoading(false);
         setError(null);
-        if (autoplay) howlRef.current?.play();
+        if (autoplay && currentHowl.state() !== 'unloaded') {
+          const result = await safePlay(currentHowl);
+          if (!result.success) {
+            setError('No se pudo reproducir automáticamente. Presiona play.');
+          }
+        }
       },
       onplay: () => {
         isLoadingRef.current = false;
@@ -63,12 +69,18 @@ export function useTrackLoader(options: TrackLoaderOptions) {
         setIsLoading(false);
         setError('No se pudo cargar el audio. Verifica tu conexión.');
       },
-      onplayerror: () => {
+      onplayerror: async () => {
+        const resumed = await resumeAudioContext();
+        if (resumed && currentHowl.state() !== 'unloaded') {
+          const result = await safePlay(currentHowl);
+          if (result.success) return;
+        }
         isLoadingRef.current = false;
         setIsLoading(false);
         setError('Error al reproducir. Intenta de nuevo.');
       }
     });
+    howlRef.current = currentHowl;
 
     setTimeout(() => {
       if (isLoadingRef.current) {

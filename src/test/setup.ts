@@ -7,19 +7,33 @@ afterEach(() => {
   cleanup();
 });
 
+// Mock AudioContext for Howler
+const mockAudioContextForHowler = {
+  state: 'running' as AudioContextState,
+  resume: vi.fn().mockResolvedValue(undefined),
+};
+
 // Mock Howler.js (audio no funciona en tests)
 vi.mock('howler', () => ({
   Howl: vi.fn().mockImplementation(() => ({
-    play: vi.fn(),
+    play: vi.fn().mockReturnValue(1),
     pause: vi.fn(),
     stop: vi.fn(),
     unload: vi.fn(),
     volume: vi.fn(),
     on: vi.fn(),
     once: vi.fn(),
+    off: vi.fn(),
     state: vi.fn().mockReturnValue('loaded'),
+    playing: vi.fn().mockReturnValue(false),
   })),
+  Howler: {
+    ctx: mockAudioContextForHowler,
+  },
 }));
+
+// Export for tests that need to modify mock behavior
+export { mockAudioContextForHowler };
 
 // Mock IntersectionObserver
 class MockIntersectionObserver {

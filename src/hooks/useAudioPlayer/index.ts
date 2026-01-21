@@ -5,6 +5,7 @@ import { useHowlInstance, cleanupHowl } from './useHowlInstance';
 import { useTrackLoader } from './useTrackLoader';
 import { useFadeOut } from './useFadeOut';
 import { usePlaybackControls } from './usePlaybackControls';
+import { resumeAudioContext } from './usePlaybackRecovery';
 
 export default function useAudioPlayer(
   tracks: Track[],
@@ -62,6 +63,16 @@ export default function useAudioPlayer(
       loadTrack(tracks, 0, wasPlaying);
     }
   }, [sceneId, tracks, isPlaying, loadTrack, howlRefs]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        resumeAudioContext();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   return {
     currentTrack: tracks?.[currentTrackIndex] || null,
