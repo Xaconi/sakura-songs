@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Carousel from './components/Carousel/Carousel';
 import Controls from './components/Controls/Controls';
 import SceneIndicator from './components/SceneIndicator/SceneIndicator';
@@ -32,6 +32,19 @@ export default function App() {
 
   const [isAmbientModalOpen, setIsAmbientModalOpen] = useState(false);
   const ambientEffects = useAmbientEffects();
+
+  // Sync ambient effects with main audio play state (for iOS lock screen controls)
+  const prevIsPlayingRef = useRef(isPlaying);
+  useEffect(() => {
+    if (prevIsPlayingRef.current !== isPlaying) {
+      prevIsPlayingRef.current = isPlaying;
+      if (isPlaying) {
+        ambientEffects.resume();
+      } else {
+        ambientEffects.pause();
+      }
+    }
+  }, [isPlaying, ambientEffects]);
 
   const handleTimerEnd = useCallback(() => {
     fadeOut(5000, () => {

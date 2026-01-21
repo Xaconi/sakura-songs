@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Howl } from 'howler';
 import { AMBIENT_EFFECTS, FADE_DURATION_MS, DEFAULT_VOLUME } from '../../data/ambientEffects';
 import { loadStoredState, saveState } from './storage';
+import { safePlay, resumeAudioContext } from '../useAudioPlayer/usePlaybackRecovery';
 import type { AmbientEffectsHook } from './types';
 
 export default function useAmbientEffects(): AmbientEffectsHook {
@@ -42,14 +43,19 @@ export default function useAmbientEffects(): AmbientEffectsHook {
     }
   }, []);
 
-  const fadeIn = useCallback((howl: Howl, targetVolume: number) => {
+  const fadeIn = useCallback(async (howl: Howl, targetVolume: number) => {
     const steps = 25;
     const stepDuration = FADE_DURATION_MS / steps;
     const volumeIncrement = targetVolume / steps;
     let currentStep = 0;
 
     howl.volume(0);
-    howl.play();
+    const result = await safePlay(howl);
+
+    if (!result.success) {
+      setError('No se pudo reproducir el efecto. Intenta de nuevo.');
+      return;
+    }
 
     fadeIntervalRef.current = setInterval(() => {
       currentStep++;
@@ -114,6 +120,7 @@ export default function useAmbientEffects(): AmbientEffectsHook {
 
     const howl = new Howl({
       src: [effect.src],
+      html5: true,
       loop: true,
       volume: 0,
       onload: () => {
@@ -125,6 +132,15 @@ export default function useAmbientEffects(): AmbientEffectsHook {
         setError(`Failed to load ${effect.name}: ${errorMsg}`);
         cleanupHowl();
         setActiveEffectId(null);
+      },
+      onplayerror: async () => {
+        const resumed = await resumeAudioContext();
+        if (resumed && howl.state() !== 'unloaded') {
+          const result = await safePlay(howl);
+          if (result.success) return;
+        }
+        setIsLoading(false);
+        setError('Error al reproducir efecto. Intenta de nuevo.');
       },
     });
 
@@ -175,6 +191,30 @@ export default function useAmbientEffects(): AmbientEffectsHook {
     });
   }, [fadeOut]);
 
+  const pause = useCallback(() => {
+    if (howlRef.current && howlRef.current.playing()) {
+      howlRef.current.pause();
+    }
+  }, []);
+
+  const resume = useCallback(async () => {
+    if (howlRef.current && !howlRef.current.playing() && activeEffectId) {
+      await resumeAudioContext();
+      howlRef.current.play();
+    }
+  }, [activeEffectId]);
+
+  // Pre-resume AudioContext when returning to foreground
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        resumeAudioContext();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -192,6 +232,8 @@ export default function useAmbientEffects(): AmbientEffectsHook {
     setVolume,
     stopAll,
     getVolume,
+    pause,
+    resume,
   };
 }
 
