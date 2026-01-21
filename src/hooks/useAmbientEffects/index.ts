@@ -120,6 +120,7 @@ export default function useAmbientEffects(): AmbientEffectsHook {
 
     const howl = new Howl({
       src: [effect.src],
+      html5: true,
       loop: true,
       volume: 0,
       onload: () => {
